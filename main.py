@@ -1,7 +1,7 @@
-videos = {}
-endpoints = {}
-caches = {}
-requests = {}
+videos = dict()
+endpoints = dict()
+caches = dict()
+requests = dict()
 
 init = input().split()
 numVideos = int(init[0]) #TODO
@@ -29,6 +29,8 @@ for i in range(numCaches):
     caches[i] = {
         'id': i,
         'endpoints': dict(),
+        'results': [],
+        'stored': [],
     }
 for i in range(numRequests):
     requests[i] = {
@@ -68,5 +70,33 @@ for r in range(numRequests):
         'num': rLine[2],
     }
 
-  
+req = dict()
+for r in range(numRequests):
+    current = requests[r]
+    if (current['videoId'], current['endpointId']) in req:
+        req[(current['videoId'], current['endpointId'])] += current['requests']
+    else:
+        req[(current['videoId'], current['endpointId'])] = current['requests']
+    
+
+for c in caches.values():
+    for v in videos.values():
+        diff = 0
+        for e in c['endpoints'].values():
+            data = req.get((v['id'], e['id']), 0) * v['size']
+            delta = e['latency'] - c['endpoints'][e['id']]['latency']
+            diff += data*delta
+        c['results'].append((diff, v['id']))
+    c['results'].sort()
+    c['results'] = list(set(c['results']))
+    currentSize = cacheSize
+    for diff, vid in reversed(c['results']):
+        vidSize = videos[vid]['size']
+        if currentSize >= vidSize:
+            currentSize -= videos[vid]['size']
+            c['stored'].append(vid)
+print(numCaches)
 print(caches)
+for c in caches:
+    print(c, end=" ")
+    print(" ".join(map(str, caches[c]['stored'])))
