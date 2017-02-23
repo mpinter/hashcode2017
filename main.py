@@ -84,7 +84,7 @@ for c in caches.values():
         diff = 0
         for e in c['endpoints'].values():
             data = req.get((v['id'], e['id']), 0) * v['size']
-            delta = e['latency'] - c['endpoints'][e['id']]['latency']
+            delta = endpoints[e['id']]['latency'] - c['endpoints'][e['id']]['latency']
             diff += data*delta
         c['results'].append((diff, v['id']))
     c['results'].sort()
@@ -95,8 +95,6 @@ for c in caches.values():
         if currentSize >= vidSize:
             currentSize -= videos[vid]['size']
             c['stored'].append(vid)
-print(numCaches)
-print(caches)
 for c in caches:
     print(c, end=" ")
     print(" ".join(map(str, caches[c]['stored'])))
